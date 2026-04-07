@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NSE Inzichten — Concept Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F7F6F3;
+  --surface: #FFFFFF;
+  --surface-2: #F2F0EC;
+  --border: #E0DDD8;
+  --border-strong: #C8C5BF;
+  --text: #1A1917;
+  --text-2: #6B6860;
+  --text-3: #9E9B96;
+  --purple: #4C3FD4;
+  --purple-light: #EAE8FC;
+  --purple-mid: #AFA9EC;
+  --teal: #0F7B5E;
+  --radius: 12px;
+  --radius-pill: 999px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: .85rem;
+}
+
+header h1 {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: .2rem;
+}
+
+header p {
+  font-size: 12px;
+  color: var(--text-2);
+  font-weight: 300;
+}
+
+.wrapper {
+  width: 100%;
+  max-width: 1100px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.panel {
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  padding: .55rem .9rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+}
+
+.panel-num {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text-3);
+  flex-shrink: 0;
+  transition: background .3s, border-color .3s, color .3s;
+}
+
+.panel-num.active { background: var(--purple-light); border-color: var(--purple-mid); color: var(--purple); }
+.panel-num.done { background: #E0F4EE; border-color: #5DCAA5; color: var(--teal); }
+
+.panel-title {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text-3);
+  transition: color .3s;
+}
+
+.panel-title.active { color: var(--purple); }
+.panel-title.done { color: var(--teal); }
+
+.panel-body {
+  flex: 1;
+  padding: 1rem .9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 320px;
+}
+
+.panel-idle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: .18;
+  width: 100%;
+  height: 100%;
+}
+
+.panel-idle svg {
+  width: 28px;
+  height: 28px;
+  stroke: var(--text-3);
+  fill: none;
+  stroke-width: 1;
+}
+
+/* Upload */
+.upload-zone {
+  width: 100%;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: 10px;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .65rem;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  text-align: center;
+}
+
+.upload-zone:hover { border-color: var(--purple); background: var(--purple-light); }
+
+.upload-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .2s, border-color .2s;
+}
+
+.upload-zone:hover .upload-icon { background: var(--purple-light); border-color: var(--purple-mid); }
+
+.upload-icon svg {
+  width: 15px;
+  height: 15px;
+  stroke: var(--text-2);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke .2s;
+}
+
+.upload-zone:hover .upload-icon svg { stroke: var(--purple); }
+
+.upload-zone h2 { font-size: 13px; font-weight: 500; }
+
+.upload-zone p {
+  font-size: 11px;
+  color: var(--text-2);
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+.btn-primary {
+  padding: .45rem 1.2rem;
+  border-radius: var(--radius-pill);
+  background: var(--purple);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: opacity .15s, transform .1s;
+}
+
+.btn-primary:hover { opacity: .88; }
+.btn-primary:active { transform: scale(.97); }
+
+.file-meta {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text-3);
+  margin-top: .4rem;
+  text-align: center;
+}
+
+/* AI */
+.ai-stage {
+  position: relative;
+  width: 100%;
+  height: 210px;
+  overflow: hidden;
+}
+
+.ai-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid var(--purple-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.ai-core-label {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  color: var(--purple);
+  letter-spacing: .1em;
+}
+
+.ai-pulse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 1px solid var(--purple-mid);
+  animation: pulse 2s ease-out infinite;
+  z-index: 9;
+}
+
+.ai-pulse:nth-child(2) { animation-delay: .65s; }
+.ai-pulse:nth-child(3) { animation-delay: 1.3s; }
+
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: .5; }
+  100% { transform: translate(-50%, -50%) scale(3.4); opacity: 0; }
+}
+
+.orbit-tag {
+  position: absolute;
+  padding: .18rem .5rem;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .5s;
+  z-index: 8;
+}
+
+.ai-bottom {
+  width: 100%;
+  margin-top: .65rem;
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+
+.progress-track {
+  width: 100%;
+  height: 2px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--purple);
+  border-radius: 2px;
+  width: 0%;
+  transition: width .08s linear;
+}
+
+.ai-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ai-status {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text-2);
+  transition: opacity .2s;
+}
+
+.ai-pct {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  color: var(--purple);
+  font-weight: 500;
+}
+
+/* Dashboard panel */
+.panel-body.dash-body {
+  padding: 0;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.dash-inner-header {
+  padding: .5rem .9rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .3rem;
+}
+
+.dash-title { font-size: 12px; font-weight: 500; }
+
+.filter-row { display: flex; gap: .3rem; flex-wrap: wrap; }
+
+.filter-pill {
+  padding: .15rem .5rem;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-family: 'DM Mono', monospace;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  flex: 1;
+}
+
+.dash-panel { background: var(--surface); padding: .6rem .75rem; }
+
+.dash-panel-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: .45rem;
+}
+
+.bubble-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
+  min-height: 56px;
+  align-content: flex-start;
+}
+
+.bubble {
+  padding: .18rem .5rem;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0;
+  transform: scale(.6) translateY(4px);
+  transition: opacity .35s, transform .35s;
+}
+
+.bar-item { margin-bottom: .38rem; }
+.bar-item:last-child { margin-bottom: 0; }
+
+.bar-meta { display: flex; justify-content: space-between; margin-bottom: .18rem; }
+
+.bar-name {
+  font-size: 10px;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+.bar-num { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-3); }
+
+.bar-track { height: 4px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  width: 0%;
+  transition: width .7s cubic-bezier(.22,1,.36,1);
+}
+
+.mini-bars { display: flex; align-items: flex-end; gap: 3px; height: 36px; }
+
+.mini-bar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  background: var(--purple-mid);
+  opacity: 0;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: opacity .3s, transform .5s cubic-bezier(.22,1,.36,1);
+}
+
+.mini-bar-label {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text-3);
+  text-align: center;
+  margin-top: .18rem;
+}
+
+.trend-years { display: flex; gap: 3px; margin-top: .18rem; }
+
+.compare-row { margin-bottom: .4rem; }
+.compare-row:last-child { margin-bottom: 0; }
+.compare-label { font-size: 10px; color: var(--text-2); margin-bottom: .2rem; }
+
+.compare-bar-wrap { display: flex; align-items: center; gap: .3rem; margin-bottom: 2px; }
+
+.compare-type {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text-3);
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.compare-track { flex: 1; height: 4px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+
+.compare-fill {
+  height: 100%;
+  border-radius: 3px;
+  width: 0%;
+  transition: width .7s cubic-bezier(.22,1,.36,1);
+}
+
+.compare-val { font-size: 9px; font-family: 'DM Mono', monospace; color: var(--text-3); width: 24px; text-align: right; }
+
+.dash-footer {
+  padding: .45rem .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+}
+
+.dash-footer-meta { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--text-3); }
+
+.btn-ghost {
+  padding: .28rem .8rem;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+  font-size: 11px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.btn-ghost:hover { background: var(--surface-2); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NSE Inzichten — Concept Flow</h1>
+  <p>Van ruwe studentfeedback naar gestructureerde inzichten</p>
+</header>
+
+<div class="wrapper">
+
+  <!-- Panel 1 -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-num active" id="num-1">1</div>
+      <span class="panel-title active" id="title-1">Importeer data</span>
+    </div>
+    <div class="panel-body" id="body-1">
+      <div class="upload-zone" onclick="startFlow()">
+        <div class="upload-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <h2>Importeer NSE-responses</h2>
+        <p>Sleep een bestand hierheen of klik om te kiezen.<br>.xlsx of .csv</p>
+        <button class="btn-primary" onclick="event.stopPropagation(); startFlow()">Bestand kiezen</button>
+      </div>
+      <p class="file-meta">NSE_2025_open_responses.xlsx — 14.832 responses</p>
+    </div>
+  </div>
+
+  <!-- Panel 2 -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-num" id="num-2">2</div>
+      <span class="panel-title" id="title-2">AI analyseert</span>
+    </div>
+    <div class="panel-body" id="body-2">
+      <div class="panel-idle" id="idle-2">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div id="ai-content" style="display:none; width:100%; flex-direction:column; align-items:center; gap:.65rem;">
+        <div class="ai-stage" id="ai-stage">
+          <div class="ai-pulse"></div>
+          <div class="ai-pulse"></div>
+          <div class="ai-pulse"></div>
+          <div class="ai-core"><span class="ai-core-label">AI</span></div>
+        </div>
+        <div class="ai-bottom">
+          <div class="ai-status-row">
+            <span class="ai-status" id="ai-status">Antwoorden inladen...</span>
+            <span class="ai-pct" id="ai-pct">0%</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel 3 -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-num" id="num-3">3</div>
+      <span class="panel-title" id="title-3">Dashboard</span>
+    </div>
+    <div class="panel-body dash-body" id="body-3">
+      <div class="panel-idle" id="idle-3" style="height:100%; width:100%;">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <div id="dash-content" style="display:none; flex-direction:column; width:100%; flex:1;">
+        <div class="dash-inner-header">
+          <span class="dash-title">NSE Inzichten — 2025</span>
+          <div class="filter-row">
+            <span class="filter-pill">Eindhoven</span>
+            <span class="filter-pill">Soft. Eng.</span>
+            <span class="filter-pill">Voltijd</span>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="dash-panel">
+            <div class="dash-panel-label">Thematisch landschap</div>
+            <div class="bubble-cloud" id="bubbles"></div>
+          </div>
+          <div class="dash-panel">
+            <div class="dash-panel-label">Frequentie</div>
+            <div id="bars"></div>
+          </div>
+          <div class="dash-panel">
+            <div class="dash-panel-label">Trend 2022–2025</div>
+            <div class="mini-bars" id="trend-bars"></div>
+            <div class="trend-years" id="trend-years"></div>
+          </div>
+          <div class="dash-panel">
+            <div class="dash-panel-label">Studievorm</div>
+            <div id="compare"></div>
+          </div>
+        </div>
+        <div class="dash-footer">
+          <span class="dash-footer-meta">14.832 responses · privacy-conform</span>
+          <button class="btn-ghost" onclick="reset()">Opnieuw</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const themes = [
+  { label: 'Begeleiding',      bg: '#EAE8FC', text: '#3C3489', pct: 78 },
+  { label: 'Leeromgeving',     bg: '#E0F4EE', text: '#085041', pct: 64 },
+  { label: 'Roostering',       bg: '#FDF3DF', text: '#9A6200', pct: 51 },
+  { label: 'Faciliteiten',     bg: '#E6F1FB', text: '#0C447C', pct: 47 },
+  { label: 'Groepsprojecten',  bg: '#FBEAF0', text: '#72243E', pct: 43 },
+  { label: 'Examinering',      bg: '#FAECE7', text: '#712B13', pct: 38 },
+  { label: 'Stagebegeleiding', bg: '#EAF3DE', text: '#27500A', pct: 29 },
+];
+
+const statusMsgs = [
+  'Antwoorden inladen...','Taal detecteren...','Thema\'s herkennen...',
+  'Sentiment analyseren...','Subthema\'s groeperen...','Trends berekenen...','Dashboard samenstellen...',
+];
+
+const trendData = [
+  { year: '\'22', h: 30 }, { year: '\'23', h: 42 }, { year: '\'24', h: 36 }, { year: '\'25', h: 52 },
+];
+
+const compareData = [
+  { label: 'Begeleiding',  volt: 78, deel: 62 },
+  { label: 'Roostering',   volt: 51, deel: 71 },
+  { label: 'Faciliteiten', volt: 47, deel: 44 },
+];
+
+let orbitTags = [], orbitRaf, progInterval, progVal = 0, angle = 0;
+
+function setActive(n) {
+  [1,2,3].forEach(i => {
+    const num = document.getElementById('num-' + i);
+    const title = document.getElementById('title-' + i);
+    num.classList.remove('active','done');
+    title.classList.remove('active','done');
+    if (i < n) { num.classList.add('done'); title.classList.add('done'); }
+    if (i === n) { num.classList.add('active'); title.classList.add('active'); }
+  });
+}
+
+function startFlow() {
+  setActive(2);
+  document.getElementById('idle-2').style.display = 'none';
+  const ac = document.getElementById('ai-content');
+  ac.style.display = 'flex';
+  spawnOrbiters();
+  animateProgress();
+}
+
+function spawnOrbiters() {
+  const stage = document.getElementById('ai-stage');
+  orbitTags = [];
+  themes.forEach((t, i) => {
+    const tag = document.createElement('div');
+    tag.className = 'orbit-tag';
+    tag.textContent = t.label;
+    tag.style.background = t.bg;
+    tag.style.color = t.text;
+    tag.style.border = '1px solid ' + t.text + '33';
+    stage.appendChild(tag);
+    orbitTags.push({ el: tag, offset: (i / themes.length) * Math.PI * 2, rx: 140, ry: 70 });
+    setTimeout(() => { tag.style.opacity = '1'; }, i * 200 + 200);
+  });
+
+  function loop() {
+    angle += 0.009;
+    const cx = stage.offsetWidth / 2;
+    const cy = stage.offsetHeight / 2;
+    orbitTags.forEach(o => {
+      const a = o.offset + angle;
+      o.el.style.left = (cx + o.rx * Math.cos(a) - 40) + 'px';
+      o.el.style.top = (cy + o.ry * Math.sin(a) - 12) + 'px';
+    });
+    orbitRaf = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function animateProgress() {
+  progVal = 0;
+  let msgIdx = 0;
+  const fill = document.getElementById('prog-fill');
+  const status = document.getElementById('ai-status');
+  const pct = document.getElementById('ai-pct');
+
+  progInterval = setInterval(() => {
+    progVal += .9;
+    const v = Math.min(progVal, 100);
+    fill.style.width = v + '%';
+    pct.textContent = Math.round(v) + '%';
+    const ni = Math.floor((v / 100) * statusMsgs.length);
+    if (ni !== msgIdx && ni < statusMsgs.length) {
+      msgIdx = ni;
+      status.style.opacity = '0';
+      setTimeout(() => { status.textContent = statusMsgs[msgIdx]; status.style.opacity = '1'; }, 150);
+    }
+    if (v >= 100) {
+      clearInterval(progInterval);
+      cancelAnimationFrame(orbitRaf);
+      orbitTags.forEach(o => { o.el.style.opacity = '0'; });
+      setTimeout(() => {
+        orbitTags.forEach(o => o.el.remove());
+        orbitTags = [];
+        showDashboard();
+      }, 500);
+    }
+  }, 55);
+}
+
+function showDashboard() {
+  setActive(3);
+  document.getElementById('idle-3').style.display = 'none';
+  const dc = document.getElementById('dash-content');
+  dc.style.display = 'flex';
+  buildBubbles(); buildBars(); buildTrend(); buildCompare();
+}
+
+function buildBubbles() {
+  const c = document.getElementById('bubbles');
+  c.innerHTML = '';
+  themes.forEach((t, i) => {
+    const b = document.createElement('div');
+    b.className = 'bubble';
+    b.textContent = t.label;
+    b.style.background = t.bg;
+    b.style.color = t.text;
+    b.style.border = '1px solid ' + t.text + '33';
+    b.style.fontSize = (9 + Math.round((t.pct / 100) * 4)) + 'px';
+    c.appendChild(b);
+    setTimeout(() => { b.style.opacity = '1'; b.style.transform = 'scale(1) translateY(0)'; }, 80 + i * 80);
+  });
+}
+
+function buildBars() {
+  const c = document.getElementById('bars');
+  c.innerHTML = '';
+  themes.slice(0, 5).forEach((t, i) => {
+    const item = document.createElement('div');
+    item.className = 'bar-item';
+    item.innerHTML =
+      '<div class="bar-meta"><span class="bar-name">' + t.label + '</span><span class="bar-num">' + t.pct + '%</span></div>' +
+      '<div class="bar-track"><div class="bar-fill" id="bf' + i + '" style="background:' + t.text + '88"></div></div>';
+    c.appendChild(item);
+    setTimeout(() => { document.getElementById('bf' + i).style.width = t.pct + '%'; }, 150 + i * 100);
+  });
+}
+
+function buildTrend() {
+  const bC = document.getElementById('trend-bars');
+  const yC = document.getElementById('trend-years');
+  bC.innerHTML = ''; yC.innerHTML = '';
+  const max = Math.max(...trendData.map(d => d.h));
+  trendData.forEach((d, i) => {
+    const bar = document.createElement('div');
+    bar.className = 'mini-bar';
+    bar.style.height = (36 * d.h / max) + 'px';
+    bC.appendChild(bar);
+    setTimeout(() => { bar.style.opacity = '1'; bar.style.transform = 'scaleY(1)'; }, 200 + i * 90);
+    const lbl = document.createElement('div');
+    lbl.className = 'mini-bar-label';
+    lbl.style.flex = '1';
+    lbl.textContent = d.year;
+    yC.appendChild(lbl);
+  });
+}
+
+function buildCompare() {
+  const c = document.getElementById('compare');
+  c.innerHTML = '';
+  compareData.forEach((row, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'compare-row';
+    wrap.innerHTML =
+      '<div class="compare-label">' + row.label + '</div>' +
+      '<div class="compare-bar-wrap"><span class="compare-type">Voltijd</span><div class="compare-track"><div class="compare-fill" id="cv' + i + '" style="background:#4C3FD4"></div></div><span class="compare-val">' + row.volt + '%</span></div>' +
+      '<div class="compare-bar-wrap"><span class="compare-type">Deeltijd</span><div class="compare-track"><div class="compare-fill" id="cd' + i + '" style="background:#0F7B5E"></div></div><span class="compare-val">' + row.deel + '%</span></div>';
+    c.appendChild(wrap);
+    setTimeout(() => {
+      document.getElementById('cv' + i).style.width = row.volt + '%';
+      document.getElementById('cd' + i).style.width = row.deel + '%';
+    }, 250 + i * 120);
+  });
+}
+
+function reset() {
+  clearInterval(progInterval);
+  cancelAnimationFrame(orbitRaf);
+  orbitTags.forEach(o => o.el && o.el.remove());
+  orbitTags = []; progVal = 0; angle = 0;
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('ai-pct').textContent = '0%';
+  document.getElementById('ai-status').textContent = 'Antwoorden inladen...';
+  document.getElementById('idle-2').style.display = 'flex';
+  document.getElementById('ai-content').style.display = 'none';
+  document.getElementById('idle-3').style.display = 'flex';
+  document.getElementById('dash-content').style.display = 'none';
+  setActive(1);
+}
+
+setActive(1);
+</script>
+</body>
+</html>
